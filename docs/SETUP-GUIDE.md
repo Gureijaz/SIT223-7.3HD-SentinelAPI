@@ -185,9 +185,24 @@ scanner did not run. Usually the SonarCloud token is missing or the project key 
 **`gh release create` fails with 403** — the `github-token` credential is missing
 the `repo` scope, or has expired.
 
+**Deploy stage fails with `EADDRINUSE` on 3000 or 3001** — you have your own PM2
+instances running. PM2 keeps a **separate daemon per Windows account**, and the
+Jenkins service runs as `Local System`, so its daemon cannot see or reload the
+processes your user account started — it just tries to bind a port someone else
+already holds. Before a Jenkins run, clear yours:
+
+```powershell
+npx pm2 delete all
+npx pm2 kill
+```
+
+To inspect what Jenkins' own daemon is running, use a pipeline step or a
+`PsExec -s` shell — `npx pm2 list` in your own terminal shows *your* daemon, not
+Jenkins'.
+
 **Deploy stage passes but the smoke test times out** — PM2 started the process but
 it exited. `npx pm2 logs sentinel-api-staging --lines 100`. The usual cause is a
-port already in use.
+bad `JWT_SECRET` binding, or the port being taken as above.
 
 **Monitoring stage fails with `no sentinel-api targets are configured`** —
 Prometheus is not running, or is running against a different config file. Restart
