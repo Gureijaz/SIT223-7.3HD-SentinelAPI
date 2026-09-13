@@ -1,0 +1,42 @@
+{
+  "$comment": "Dependency vulnerability policy enforced by scripts/security-gate.js at the Security stage of the pipeline. Runtime dependencies ship inside the artefact and are gated; build dependencies only ever run on the CI agent and are reported. Every waiver needs a written justification and a review date.",
+  "runtime": {
+    "failOn": [
+      "critical",
+      "high"
+    ]
+  },
+  "build": {
+    "failOn": []
+  },
+  "waivers": [
+    {
+      "package": "pm2",
+      "advisory": "",
+      "severity": "high",
+      "justification": "Process manager, build/deploy tooling only \u2014 never bundled into the release artefact. The advisory is against pm2's own CLI parsing and the latest published version (7.0.4) is still affected, so there is no forward fix to take; downgrading to the suggested 5.3.1 reintroduces older, more serious advisories. Exposure is limited to the Jenkins agent, which is not internet-facing and only runs pipeline-authored commands.",
+      "reviewBy": "2026-12-01"
+    },
+    {
+      "package": "js-yaml",
+      "advisory": "",
+      "severity": "high",
+      "justification": "Reached only through pm2's config parsing of ecosystem.config.js, a file that lives in this repository and is authored by us. The DoS requires attacker-controlled YAML, which never occurs here. No fix exists in pm2's current release line.",
+      "reviewBy": "2026-12-01"
+    },
+    {
+      "package": "adm-zip",
+      "advisory": "",
+      "severity": "moderate",
+      "justification": "Reached only through sonarqube-scanner, which uses it to unpack the scanner CLI downloaded from sonarsource.com over TLS. The advisory requires a maliciously crafted archive; the archive source is a trusted vendor endpoint and the scanner runs on the CI agent only. Latest sonarqube-scanner (5.0.0) is still affected.",
+      "reviewBy": "2026-12-01"
+    },
+    {
+      "package": "sonarqube-scanner",
+      "advisory": "",
+      "severity": "moderate",
+      "justification": "Parent of the adm-zip advisory above; the scanner itself is CI-only tooling that is never packaged or deployed. Already on the latest published major (5.0.0); npm's suggested 'fix' is a downgrade to 3.0.1, which is older and carries its own advisories.",
+      "reviewBy": "2026-12-01"
+    }
+  ]
+}

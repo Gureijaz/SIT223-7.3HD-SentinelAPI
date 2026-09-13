@@ -1,0 +1,41 @@
+# Prometheus configuration for the Sentinel API pipeline.
+#
+# Run from the repository root with:
+#   prometheus.exe --config.file=ops/prometheus/prometheus.yml --web.listen-address=:9090
+#
+# Both deployment environments are scraped from the same server so that a single
+# dashboard shows staging and production side by side, and so the Release stage
+# can assert that the promoted version is visible to monitoring.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: sentinel-pipeline
+
+rule_files:
+  - alert.rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - localhost:9093
+
+scrape_configs:
+  - job_name: sentinel-api
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - localhost:3001
+        labels:
+          env: staging
+      - targets:
+          - localhost:3000
+        labels:
+          env: production
+
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090

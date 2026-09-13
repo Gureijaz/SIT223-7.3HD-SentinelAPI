@@ -1,0 +1,57 @@
+# Alertmanager routing for the Sentinel API.
+#
+# Run from the repository root with:
+#   alertmanager.exe --config.file=ops/alertmanager/alertmanager.yml --web.listen-address=:9093
+#
+# The SMTP password is read from a file that is NOT committed - create
+# ops/alertmanager/smtp-password.txt containing only the Gmail app password.
+# See ops/README.md.
+
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: smtp.gmail.com:587
+  smtp_from: gureijazsinghaulakh@gmail.com
+  smtp_auth_username: gureijazsinghaulakh@gmail.com
+  smtp_auth_password_file: smtp-password.txt
+  smtp_require_tls: true
+
+route:
+  receiver: sentinel-email
+  group_by: [alertname, env]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  routes:
+    # Critical alerts skip the grouping delay and repeat more aggressively.
+    - matchers:
+        - severity = "critical"
+      receiver: sentinel-email
+      group_wait: 10s
+      repeat_interval: 1h
+
+inhibit_rules:
+  # If the instance is down there is no point also paging about its error ratio.
+  - source_matchers:
+      - alertname = "SentinelInstanceDown"
+    target_matchers:
+      - alertname = "SentinelHighErrorRatio"
+    equal: [env]
+
+receivers:
+  - name: sentinel-email
+    email_configs:
+      - to: gureijazsinghaulakh@gmail.com
+        send_resolved: true
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.env }})'
+        html: |
+          <h3>{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}</h3>
+          <p><b>Environment:</b> {{ .CommonLabels.env }}</p>
+          <p><b>Severity:</b> {{ .CommonLabels.severity }}</p>
+          {{ range .Alerts }}
+          <hr>
+          <p><b>{{ .Annotations.summary }}</b></p>
+          <p>{{ .Annotations.description }}</p>
+          {{ if .Annotations.runbook }}<p><b>Runbook:</b> <code>{{ .Annotations.runbook }}</code></p>{{ end }}
+          <p><b>Active since:</b> {{ .StartsAt }}</p>
+          {{ end }}

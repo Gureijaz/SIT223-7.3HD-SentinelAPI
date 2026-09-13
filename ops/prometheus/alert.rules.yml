@@ -1,0 +1,77 @@
+# Alert rules for the Sentinel API.
+#
+# Each rule states a symptom a user would actually notice, not a raw resource
+# number: the instance is gone, requests are failing, the API has become slow, or
+# the register has been hit with a burst of critical findings that needs a human.
+
+groups:
+  - name: sentinel-availability
+    interval: 15s
+    rules:
+      - alert: SentinelInstanceDown
+        expr: up{job="sentinel-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: sentinel-api
+        annotations:
+          summary: "Sentinel API {{ $labels.env }} instance is down"
+          description: >-
+            Prometheus has been unable to scrape {{ $labels.instance }}
+            ({{ $labels.env }}) for more than 1 minute. The process has either
+            crashed or PM2 has failed to restart it after a deployment.
+          runbook: "pm2 list && pm2 logs sentinel-api-{{ $labels.env }} --lines 100"
+
+  - name: sentinel-traffic
+    interval: 15s
+    rules:
+      - alert: SentinelHighErrorRatio
+        expr: >-
+          sum by (env) (rate(sentinel_http_errors_total[2m]))
+          /
+          clamp_min(sum by (env) (rate(sentinel_http_requests_total[2m])), 0.001)
+          > 0.25
+        for: 1m
+        labels:
+          severity: critical
+          service: sentinel-api
+        annotations:
+          summary: "Over 25% of Sentinel API requests are failing in {{ $labels.env }}"
+          description: >-
+            {{ $value | humanizePercentage }} of requests handled by the
+            {{ $labels.env }} instance over the last 2 minutes returned a 4xx or
+            5xx status. A bad release, an expired signing secret, or a client
+            hammering a protected route are the usual causes.
+          runbook: "Check the most recent deployment, then pm2 logs for the affected environment."
+
+      - alert: SentinelHighLatencyP95
+        expr: >-
+          histogram_quantile(
+            0.95,
+            sum by (env, le) (rate(sentinel_http_request_duration_seconds_bucket[5m]))
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: sentinel-api
+        annotations:
+          summary: "Sentinel API p95 latency above 1s in {{ $labels.env }}"
+          description: >-
+            The 95th percentile request duration in {{ $labels.env }} has been
+            above one second for five minutes ({{ $value | humanizeDuration }}).
+
+  - name: sentinel-business
+    interval: 15s
+    rules:
+      - alert: SentinelCriticalFindingBurst
+        expr: increase(sentinel_findings_created_total{severity="critical"}[10m]) >= 5
+        for: 0m
+        labels:
+          severity: warning
+          service: sentinel-api
+        annotations:
+          summary: "Five or more critical findings logged in ten minutes ({{ $labels.env }})"
+          description: >-
+            {{ $value }} critical findings were recorded in the last ten minutes.
+            This usually means a scan has just been imported and the on-call
+            analyst should start triage.
