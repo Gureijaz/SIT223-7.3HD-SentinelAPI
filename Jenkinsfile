@@ -53,7 +53,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
                 }
-                echo "Building ${GITHUB_REPO} @ ${env.GIT_COMMIT_SHORT} as v${RELEASE_VERSION}"
+                echo "Building ${GITHUB_REPO} @ ${env.GIT_COMMIT_SHORT} as v${RELEASE_VERSION} on ${env.GIT_BRANCH}"
             }
         }
 
@@ -159,7 +159,7 @@ pipeline {
             when {
                 allOf {
                     expression { return params.RELEASE_TO_PRODUCTION }
-                    branch 'main'
+                    expression { return ['origin/main', 'main'].contains(env.GIT_BRANCH) || env.BRANCH_NAME == 'main' }
                 }
             }
             steps {
@@ -195,7 +195,7 @@ pipeline {
 
         stage('Monitoring & Alerting') {
             steps {
-                bat "set APP_VERSION=${RELEASE_VERSION} && node scripts/monitoring-check.js"
+                bat "set \"APP_VERSION=${RELEASE_VERSION}\" && node scripts/monitoring-check.js"
 
                 script {
                     if (params.RUN_INCIDENT_SIMULATION) {

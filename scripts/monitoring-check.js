@@ -5,7 +5,7 @@ const path = require('path');
 
 const PROMETHEUS_URL = (process.env.PROMETHEUS_URL || 'http://localhost:9090').replace(/\/$/, '');
 const ALERTMANAGER_URL = (process.env.ALERTMANAGER_URL || 'http://localhost:9093').replace(/\/$/, '');
-const EXPECTED_VERSION = process.env.APP_VERSION || null;
+const EXPECTED_VERSION = (process.env.APP_VERSION || '').trim() || null;
 const TIMEOUT_MS = 10000;
 
 const results = [];

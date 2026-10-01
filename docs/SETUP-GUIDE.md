@@ -15,8 +15,8 @@ Target environment: Windows 11, Jenkins running as a Windows service as
 | --- | --- | --- |
 | Node.js 20+ | `node --version` | `winget install OpenJS.NodeJS.LTS --scope machine` |
 | Git | `git --version` | `winget install Git.Git --scope machine` |
-| GitHub CLI | `gh --version` | `winget install GitHub.cli` |
-| Trivy | `trivy --version` | `winget install AquaSecurity.Trivy` |
+| GitHub CLI | `gh --version` | `winget install GitHub.cli --scope machine` |
+| Trivy | `trivy --version` | `winget install AquaSecurity.Trivy --scope machine` |
 | Jenkins | <http://localhost:8080> | `winget install Jenkins.Jenkins` |
 
 > **Why `--scope machine` matters.** The Jenkins service runs as `Local System`,
