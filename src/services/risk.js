@@ -19,14 +19,6 @@ const STATUS_MULTIPLIERS = {
 const AGE_CAP_DAYS = 90;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-/**
- * Scores a single finding from 0-100.
- *
- * The score blends three signals: the declared severity, the CVSS base score
- * when one is supplied, and how long the finding has been sitting unresolved.
- * Remediation progress damps the whole thing, so a resolved critical scores 0
- * while an untouched one that has aged past the cap scores the maximum.
- */
 function scoreFinding(finding, now = Date.now()) {
   if (!finding || !SEVERITY_WEIGHTS[finding.severity]) {
     throw new Error(`Unknown severity: ${finding && finding.severity}`);
@@ -45,7 +37,6 @@ function scoreFinding(finding, now = Date.now()) {
   return Math.round(Math.min(100, raw) * 10) / 10;
 }
 
-/** Aggregates a set of findings into the numbers the /api/findings/stats endpoint returns. */
 function summarise(findings, now = Date.now()) {
   const bySeverity = Object.fromEntries(Object.keys(SEVERITY_WEIGHTS).map((k) => [k, 0]));
   const byStatus = Object.fromEntries(Object.keys(STATUS_MULTIPLIERS).map((k) => [k, 0]));

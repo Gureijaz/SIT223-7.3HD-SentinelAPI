@@ -1,22 +1,5 @@
 'use strict';
 
-/**
- * Code Quality stage gate.
- *
- * The usual Jenkins recipe for this is `waitForQualityGate`, which depends on
- * SonarCloud making an inbound webhook call back to Jenkins. This Jenkins
- * controller runs on localhost and is not reachable from the internet, so the
- * gate is polled from the other direction instead: read the analysis id the
- * scanner just wrote, poll the compute-engine task until it finishes, then read
- * the quality gate result and fail the build when it is red.
- *
- *   node scripts/quality-gate.js --fail-on-error
- *   node scripts/quality-gate.js --report-only
- *
- * Reads SONAR_TOKEN from the environment; Jenkins injects it from its credential
- * store and it is never written to disk or to a report.
- */
-
 const fs = require('fs');
 const path = require('path');
 
@@ -30,7 +13,7 @@ function readTaskReport() {
   const file = path.join(process.cwd(), '.scannerwork', 'report-task.txt');
 
   if (!fs.existsSync(file)) {
-    throw new Error('.scannerwork/report-task.txt not found — did sonar-scanner run?');
+    throw new Error('.scannerwork/report-task.txt not found. Did sonar-scanner run?');
   }
 
   return Object.fromEntries(

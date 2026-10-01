@@ -22,8 +22,6 @@ function shutdown(signal) {
   logger.info({ signal }, 'shutting down');
   server.close(() => process.exit(0));
 
-  // Force the process down if connections refuse to drain, so PM2 restarts
-  // during a deploy never hang the pipeline.
   setTimeout(() => process.exit(1), 10_000).unref();
 }
 

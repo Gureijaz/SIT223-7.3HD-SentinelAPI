@@ -85,7 +85,6 @@ function update(id, patch, actor) {
   const existing = findingsRepository.findById(id);
   if (!existing) throw new NotFoundError('Finding');
 
-  // Analysts own what they reported; admins can edit anything.
   if (actor.role !== 'admin' && existing.reportedBy !== actor.sub) {
     throw new ForbiddenError('Only the reporter or an admin can modify this finding');
   }

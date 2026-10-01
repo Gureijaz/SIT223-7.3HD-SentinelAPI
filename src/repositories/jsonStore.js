@@ -5,14 +5,6 @@ const path = require('path');
 
 const EMPTY = { users: [], findings: [] };
 
-/**
- * A tiny file-backed document store.
- *
- * Deliberately dependency-free: the pipeline has to run on a Jenkins agent with
- * no database service, and every native-addon database driver adds a compile
- * step that can fail on the agent. Reads are served from an in-memory cache and
- * writes are flushed atomically via a temp file + rename.
- */
 class JsonStore {
   constructor(filePath) {
     this.filePath = filePath;
@@ -49,7 +41,6 @@ class JsonStore {
     return data[name];
   }
 
-  /** Drops all data. Used by the test suites to isolate cases from each other. */
   reset() {
     this.cache = structuredClone(EMPTY);
     if (fs.existsSync(this.filePath)) fs.rmSync(this.filePath);

@@ -1,12 +1,12 @@
 # Sentinel API
 
 A vulnerability-finding tracker REST API, built as the subject of a seven-stage
-Jenkins DevOps pipeline for **SIT223/SIT753 Professional Practice in IT — 7.3HD**.
+Jenkins DevOps pipeline for **SIT223/SIT753 Professional Practice in IT, 7.3HD**.
 
 Security teams record findings against assets, triage them through a workflow, and
 the API scores each finding's risk from its severity, CVSS base score and how long
 it has gone unremediated. It exists to be built, tested, analysed, scanned,
-deployed, released and monitored automatically — every stage of the pipeline acts
+deployed, released and monitored automatically. Every stage of the pipeline acts
 on something real in this codebase.
 
 | | |
@@ -35,7 +35,7 @@ Checkout → Build → Test → Code Quality → Security → Deploy → Release
 | 4 | **Security** | Scans runtime and build dependency trees separately, gates on critical/high in the shipped tree, and scans the filesystem for vulnerabilities, secrets and misconfiguration | `npm audit`, `scripts/security-gate.js`, Trivy |
 | 5 | **Deploy** | Reloads the staging instance under PM2 with staging config and a Jenkins-held secret, then proves it over HTTP | PM2, `scripts/smoke-test.js` |
 | 6 | **Release** | Publishes a tagged GitHub release carrying the artefact, promotes the same bytes to production, and verifies the running version matches | GitHub CLI, PM2, `scripts/verify-release.js` |
-| 7 | **Monitoring** | Asserts Prometheus targets are up, alert rules loaded, Alertmanager routing configured and the new version visible — then optionally fires a real incident | Prometheus, Alertmanager, `scripts/monitoring-check.js`, `scripts/simulate-incident.js` |
+| 7 | **Monitoring** | Asserts Prometheus targets are up, alert rules loaded, Alertmanager routing configured and the new version visible, then optionally fires a real incident | Prometheus, Alertmanager, `scripts/monitoring-check.js`, `scripts/simulate-incident.js` |
 
 The full pipeline definition is in [`Jenkinsfile`](Jenkinsfile).
 
@@ -74,7 +74,7 @@ and `/metrics` do not, so probes and Prometheus can reach them.
 | `PATCH` | `/api/findings/:id` | Update a finding. Reporters may edit their own; admins may edit any. |
 | `DELETE` | `/api/findings/:id` | Delete a finding. Admins only. |
 | `GET` | `/health` | Liveness, plus the running version, build number and commit. |
-| `GET` | `/ready` | Readiness — confirms the storage layer answers. |
+| `GET` | `/ready` | Readiness: confirms the storage layer answers. |
 | `GET` | `/metrics` | Prometheus exposition. |
 
 ### Example
@@ -93,11 +93,11 @@ curl -X POST http://localhost:3000/api/findings \
 ### Risk scoring
 
 `scripts`-free business logic lives in [`src/services/risk.js`](src/services/risk.js).
-A finding scores 0–100 by blending three signals:
+A finding scores 0 to 100 by blending three signals:
 
-- **severity** — a fixed weight per level (critical 40 … informational 1);
-- **CVSS** — the supplied base score, times three; when absent, 75% of the severity weight stands in;
-- **age** — up to 30 points, ramping linearly and capping at 90 days unresolved.
+- **severity**: a fixed weight per level (critical 40 … informational 1);
+- **CVSS**: the supplied base score, times three; when absent, 75% of the severity weight stands in;
+- **age**: up to 30 points, ramping linearly and capping at 90 days unresolved.
 
 Remediation progress then damps the total: `triaged` ×0.9, `in_progress` ×0.6,
 `accepted_risk` ×0.3, `resolved` ×0. So an untouched critical that has aged out

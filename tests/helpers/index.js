@@ -34,13 +34,11 @@ const SAMPLE_FINDING = {
   tags: ['redis', 'exposure'],
 };
 
-/** Registers a user and returns the bearer token plus the public user record. */
 async function registerUser(credentials) {
   const response = await request(app).post('/api/auth/register').send(credentials).expect(201);
   return { token: response.body.token, user: response.body.user };
 }
 
-/** Resets storage, then seeds an admin (registered first) and an analyst. */
 async function seedUsers() {
   store.reset();
   const admin = await registerUser(ADMIN);

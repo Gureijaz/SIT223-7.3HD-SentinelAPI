@@ -1,9 +1,3 @@
-# Alert rules for the Sentinel API.
-#
-# Each rule states a symptom a user would actually notice, not a raw resource
-# number: the instance is gone, requests are failing, the API has become slow, or
-# the register has been hit with a burst of critical findings that needs a human.
-
 groups:
   - name: sentinel-availability
     interval: 15s

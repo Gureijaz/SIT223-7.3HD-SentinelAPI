@@ -1,6 +1,5 @@
 'use strict';
 
-/** Base class for errors that are safe to surface to an API client. */
 class AppError extends Error {
   constructor(message, statusCode, code, details) {
     super(message);

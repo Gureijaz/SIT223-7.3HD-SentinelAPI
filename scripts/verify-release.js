@@ -1,17 +1,5 @@
 'use strict';
 
-/**
- * Release verification.
- *
- * A deploy command exiting zero only proves a process was asked to start. This
- * asks the production instance what it is actually running and fails the
- * Release stage unless the version and build number match what Jenkins just
- * promoted — the check that catches a reload that silently kept serving the
- * previous revision.
- *
- *   node scripts/verify-release.js --url http://localhost:3000 --version 1.0.42 --build 42
- */
-
 const { printable } = require('./printable');
 
 const args = Object.fromEntries(

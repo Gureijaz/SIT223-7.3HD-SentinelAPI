@@ -1,6 +1,6 @@
 # Monitoring stack
 
-Prometheus and Alertmanager run as standalone Windows executables — no container
+Prometheus and Alertmanager run as standalone Windows executables, with no container
 runtime, no service install. The Monitoring stage of the pipeline talks to both
 over HTTP and fails if either is blind to the release that was just promoted.
 
@@ -16,7 +16,7 @@ sentinel-api :3000 (production)  ─┼─► Prometheus :9090 ─► Alertmanag
 
 | Path | What it is |
 | --- | --- |
-| `prometheus/prometheus.yml` | Scrape config — both environments under one `sentinel-api` job, labelled `env` |
+| `prometheus/prometheus.yml` | Scrape config: both environments under one `sentinel-api` job, labelled `env` |
 | `prometheus/alert.rules.yml` | Four alert rules across availability, traffic and business signals |
 | `alertmanager/alertmanager.yml` | Email routing, severity-based sub-route, inhibition rule |
 | `grafana/sentinel-api-dashboard.json` | Importable dashboard (optional) |
@@ -37,7 +37,7 @@ Expand-Archive "$bin\alertmanager.zip" -DestinationPath $bin -Force
 Remove-Item "$bin\*.zip"
 ```
 
-Then create the SMTP password file — **this is the one step that cannot be
+Then create the SMTP password file. **This is the one step that cannot be
 automated**, because it holds a credential:
 
 ```powershell
@@ -46,7 +46,7 @@ Set-Content -Path ops\alertmanager\smtp-password.txt -Value 'your-16-char-app-pa
 ```
 
 The file is gitignored. Alertmanager reads it at send time, so a missing or wrong
-password still lets alerts fire and route — only the email delivery fails.
+password still lets alerts fire and route, and only the email delivery fails.
 
 ## Running
 
@@ -58,7 +58,7 @@ powershell -ExecutionPolicy Bypass -File ops\monitoring.ps1 -Action stop
 
 | Service | URL |
 | --- | --- |
-| Prometheus | <http://localhost:9090> — targets at `/targets`, alerts at `/alerts` |
+| Prometheus | <http://localhost:9090>: targets at `/targets`, alerts at `/alerts` |
 | Alertmanager | <http://localhost:9093> |
 
 ## Verifying and exercising it
@@ -87,8 +87,8 @@ written and no real data is touched; the alert resolves itself once traffic stop
 | `SentinelHighLatencyP95` | p95 request duration above 1s | 5m | warning |
 | `SentinelCriticalFindingBurst` | 5+ critical findings logged in 10 minutes | 0m | warning |
 
-Each carries a summary, a description that explains the likely cause, and — for
-the availability and traffic alerts — a runbook command. `SentinelInstanceDown`
+Each carries a summary, a description that explains the likely cause, and, for
+the availability and traffic alerts, a runbook command. `SentinelInstanceDown`
 inhibits `SentinelHighErrorRatio` for the same environment, so a dead instance
 pages once rather than twice.
 
@@ -98,5 +98,5 @@ Grafana is not required by the pipeline. To use the dashboard anyway: install
 Grafana, add a Prometheus data source at `http://localhost:9090` with the UID
 `prometheus`, then import `grafana/sentinel-api-dashboard.json`. It shows
 availability, deployed version, error ratio, latency percentiles, request rate by
-status code, findings created by severity, and process memory — filtered by an
+status code, findings created by severity, and process memory, filtered by an
 `env` variable so staging and production sit side by side.

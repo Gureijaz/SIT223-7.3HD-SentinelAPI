@@ -3,7 +3,6 @@
 const { verifyToken } = require('../services/auth.service');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
 
-/** Rejects the request unless it carries a valid `Authorization: Bearer <jwt>` header. */
 function authenticate(req, _res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');
@@ -20,7 +19,6 @@ function authenticate(req, _res, next) {
   }
 }
 
-/** Rejects the request unless the authenticated user holds one of `roles`. */
 function requireRole(...roles) {
   return (req, _res, next) => {
     if (!req.user) return next(new UnauthorizedError());

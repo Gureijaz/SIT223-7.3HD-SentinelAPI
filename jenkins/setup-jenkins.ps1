@@ -1,20 +1,3 @@
-<#
-.SYNOPSIS
-    Creates the Sentinel API pipeline job and its credentials in a local Jenkins.
-
-.DESCRIPTION
-    Everything this script does can also be done through the Jenkins UI; it exists
-    so the setup is repeatable and so nothing is mistyped. You supply your own
-    Jenkins API token and secrets — they are read interactively as secure strings,
-    are never written to disk, and never leave localhost.
-
-    Generate a Jenkins API token at:
-      http://localhost:8080/user/<your-username>/security  →  Add new token
-
-.EXAMPLE
-    powershell -ExecutionPolicy Bypass -File jenkins\setup-jenkins.ps1 -JenkinsUser gurei
-#>
-
 param(
     [Parameter(Mandatory = $true)]
     [string]$JenkinsUser,
@@ -50,9 +33,6 @@ function Get-Crumb {
 $crumb = Get-Crumb
 $headers = $authHeader + $crumb
 
-# ── Credentials ────────────────────────────────────────────────────────────
-# Three secret-text credentials the Jenkinsfile binds by id. Each is prompted
-# for and posted straight to the local Jenkins credential store.
 if (-not $SkipCredentials) {
     $credentialSpecs = @(
         @{ Id = 'sonarcloud-token';     Prompt = 'SonarCloud token (My Account -> Security -> Generate Token)' },
@@ -96,7 +76,6 @@ if (-not $SkipCredentials) {
     }
 }
 
-# ── Job ────────────────────────────────────────────────────────────────────
 $configXml = Get-Content -Path $configPath -Raw
 
 $jobExists = $false

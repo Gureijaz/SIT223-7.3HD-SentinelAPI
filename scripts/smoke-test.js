@@ -1,17 +1,5 @@
 'use strict';
 
-/**
- * Post-deployment smoke test.
- *
- * Runs against a *deployed* instance over HTTP, so it proves the release is
- * actually serving traffic - something the in-process Jest suites cannot show.
- *
- *   node scripts/smoke-test.js --url http://localhost:3001 --mode full
- *
- * `full`     exercises the write path (used against staging).
- * `readonly` touches only probes and rejection paths (used against production).
- */
-
 const fs = require('fs');
 const path = require('path');
 
@@ -71,15 +59,15 @@ async function check(name, fn) {
   }
 }
 
-/** Polls /health until the instance answers, so the test does not race PM2's restart. */
 async function waitForReady(attempts = 30, delayMs = 1000) {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const { status } = await http('GET', '/health');
       if (status === 200) return attempt;
     } catch {
-      // Instance is not up yet; fall through to the retry delay.
+      /* not up yet */
     }
+
     await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 

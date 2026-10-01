@@ -1,12 +1,5 @@
 'use strict';
 
-/**
- * Packages the verified build into a versioned, immutable archive.
- *
- * The archive name carries version + build number + short commit, so the exact
- * bytes deployed to staging are the exact bytes promoted at the Release stage.
- */
-
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
@@ -37,9 +30,6 @@ function stage(stagingDir) {
 }
 
 function compress(stagingDir, archivePath) {
-  // Compress-Archive ships with Windows PowerShell, so the agent needs no extra
-  // archiving tool installed. The trailing wildcard matters: without it the
-  // staging directory itself becomes a folder inside the zip.
   const contentsGlob = path.join(stagingDir, '*');
 
   const powershell = path.join(

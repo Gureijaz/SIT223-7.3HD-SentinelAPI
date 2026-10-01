@@ -1,13 +1,3 @@
-// Sentinel API — seven-stage DevOps pipeline
-// SIT223/SIT753 Professional Practice in IT — 7.3HD
-//
-// Stages: Build → Test → Code Quality → Security → Deploy → Release → Monitoring
-//
-// The agent is a Windows machine running Jenkins as a service, so every shell
-// step uses `bat`. Tooling is kept inside the repository (devDependencies +
-// `npx`) wherever possible so the pipeline does not depend on what happens to be
-// installed on the agent's PATH; the only external binaries required are node,
-// git, gh and trivy.
 
 pipeline {
     agent any
@@ -46,12 +36,8 @@ pipeline {
         PROMETHEUS_URL     = 'http://localhost:9090'
         ALERTMANAGER_URL   = 'http://localhost:9093'
 
-        // Every stage stamps artefacts and metrics with this, so a running
-        // instance can always be traced back to the build that produced it.
         RELEASE_VERSION    = "1.0.${env.BUILD_NUMBER}"
 
-        // Keep npm's cache inside the workspace: the Jenkins service runs as
-        // Local System, whose profile directory is not a sensible cache location.
         npm_config_cache   = "${WORKSPACE}\\.npm-cache"
     }
 
@@ -71,10 +57,6 @@ pipeline {
             }
         }
 
-        // ── 1 ── BUILD ──────────────────────────────────────────────────────
-        // Installs from the lockfile, stamps build metadata into the source
-        // tree, verifies the module graph loads, then packages a versioned zip
-        // that every later stage deploys. Build once, deploy many.
         stage('Build') {
             steps {
                 bat 'node --version && npm --version'
@@ -92,11 +74,6 @@ pipeline {
             }
         }
 
-        // ── 2 ── TEST ───────────────────────────────────────────────────────
-        // Unit and integration suites run as separate Jest projects so a failure
-        // is immediately attributable. JUnit XML gives Jenkins pass/fail gating
-        // and a trend graph; the coverage thresholds in jest.config.js fail the
-        // build if coverage regresses.
         stage('Test') {
             steps {
                 bat 'npm run test:unit'
@@ -120,14 +97,6 @@ pipeline {
             }
         }
 
-        // ── 3 ── CODE QUALITY ───────────────────────────────────────────────
-        // ESLint enforces the maintainability rules locally (complexity, depth,
-        // function length) so a red SonarCloud gate is never a surprise, then
-        // SonarCloud analyses the project against its own quality gate.
-        //
-        // The gate is polled through the SonarCloud web API rather than the
-        // usual waitForQualityGate webhook: this Jenkins runs on localhost and
-        // SonarCloud cannot make an inbound callback to it.
         stage('Code Quality') {
             steps {
                 bat 'npm run lint'
@@ -144,11 +113,6 @@ pipeline {
             }
         }
 
-        // ── 4 ── SECURITY ───────────────────────────────────────────────────
-        // Two complementary scanners: npm audit over the production dependency
-        // tree (gated by security-policy.json, waivers required in writing), and
-        // Trivy over the filesystem for vulnerable dependencies, hardcoded
-        // secrets and misconfiguration.
         stage('Security') {
             steps {
                 bat 'npm run security:audit'
@@ -173,11 +137,6 @@ pipeline {
             }
         }
 
-        // ── 5 ── DEPLOY (staging) ───────────────────────────────────────────
-        // PM2 reloads the staging process from the workspace with staging
-        // configuration and a Jenkins-held signing secret, then the deployment
-        // is proved by an HTTP smoke test against the running instance rather
-        // than by the deploy command's exit code.
         stage('Deploy to Staging') {
             steps {
                 withCredentials([string(credentialsId: 'sentinel-jwt-secret', variable: 'JWT_SECRET')]) {
@@ -191,16 +150,12 @@ pipeline {
                     archiveArtifacts artifacts: 'reports/smoke/smoke-full.json', allowEmptyArchive: true
                 }
                 failure {
-                    echo 'Staging smoke test failed — rolling staging back to the previous PM2 revision.'
+                    echo 'Staging smoke test failed. Showing the staging logs.'
                     bat 'npx pm2 logs sentinel-api-staging --lines 50 --nostream || exit /b 0'
                 }
             }
         }
 
-        // ── 6 ── RELEASE (production) ───────────────────────────────────────
-        // Promotion, not a rebuild: the artefact that passed staging is the one
-        // published. Creates an annotated GitHub release carrying the zip, then
-        // reloads production and verifies the promoted version is live.
         stage('Release to Production') {
             when {
                 allOf {
@@ -233,17 +188,12 @@ pipeline {
                     echo "Released v${RELEASE_VERSION} to production: ${PRODUCTION_URL}"
                 }
                 failure {
-                    echo 'Production verification failed — production is serving the previous revision.'
+                    echo 'Production verification failed. Production may still be serving the previous revision.'
                     bat 'npx pm2 logs sentinel-api-production --lines 50 --nostream || exit /b 0'
                 }
             }
         }
 
-        // ── 7 ── MONITORING & ALERTING ──────────────────────────────────────
-        // Confirms the observability stack can actually see what was just
-        // released: targets up, rules loaded, Alertmanager routing, and the new
-        // version visible in sentinel_build_info. Optionally fires a real
-        // incident to prove the alert-to-email path end to end.
         stage('Monitoring & Alerting') {
             steps {
                 bat "set APP_VERSION=${RELEASE_VERSION} && node scripts/monitoring-check.js"
@@ -279,12 +229,12 @@ pipeline {
             }
 
             emailext(
-                subject: "[${currentBuild.currentResult}] ${env.JOB_NAME} #${env.BUILD_NUMBER} — Sentinel API v${RELEASE_VERSION}",
+                subject: "[${currentBuild.currentResult}] ${env.JOB_NAME} #${env.BUILD_NUMBER} | Sentinel API v${RELEASE_VERSION}",
                 mimeType: 'text/html',
                 to: "${env.NOTIFY_RECIPIENT}",
                 attachLog: true,
                 body: """
-                    <h2>Sentinel API pipeline — ${currentBuild.currentResult}</h2>
+                    <h2>Sentinel API pipeline: ${currentBuild.currentResult}</h2>
                     <table cellpadding="4">
                       <tr><td><b>Job</b></td><td>${env.JOB_NAME} #${env.BUILD_NUMBER}</td></tr>
                       <tr><td><b>Version</b></td><td>v${RELEASE_VERSION} (${env.GIT_COMMIT_SHORT})</td></tr>

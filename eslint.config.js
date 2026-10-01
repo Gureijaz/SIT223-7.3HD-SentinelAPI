@@ -32,9 +32,6 @@ module.exports = [
       },
     },
     rules: {
-      // Maintainability rules the SonarCloud quality gate also reports on; keeping
-      // them enforced locally means a failing gate is never a surprise at the
-      // Code Quality stage.
       complexity: ['error', 12],
       'max-depth': ['error', 4],
       'max-lines-per-function': ['error', { max: 80, skipComments: true, skipBlankLines: true }],

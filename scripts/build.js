@@ -1,13 +1,5 @@
 'use strict';
 
-/**
- * Build stage helper.
- *
- * Stamps the build with version/commit/build-number metadata, then proves the
- * application actually loads with that metadata in place. Failing here stops the
- * pipeline before anything is packaged or deployed.
- */
-
 const fs = require('fs');
 const path = require('path');
 
@@ -37,8 +29,6 @@ function main() {
   const buildNumber = process.env.BUILD_NUMBER || 'local';
   const commit = gitCommit();
 
-  // Jenkins sets RELEASE_VERSION to 1.0.<BUILD_NUMBER>, so the version the
-  // running instance reports on /health is the version that was released.
   const version = process.env.RELEASE_VERSION || process.env.APP_VERSION || pkg.version;
 
   const buildInfo = {
@@ -56,8 +46,6 @@ function main() {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'build-info.json'), JSON.stringify(buildInfo, null, 2));
 
-  // Smoke-check the build: if the app cannot be constructed, there is no point
-  // producing an artefact from it.
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
   const createApp = require('../src/app');
   const app = createApp();

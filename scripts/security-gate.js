@@ -1,21 +1,5 @@
 'use strict';
 
-/**
- * Security stage gate — dependency vulnerability scanning.
- *
- * Runs `npm audit` twice, because the two trees carry very different risk:
- *
- *   runtime  (--omit=dev)  ships inside the artefact and is exposed to users.
- *                          Critical and high advisories here BLOCK the pipeline.
- *   build    (full tree)   only ever executes on the CI agent. Advisories here
- *                          are reported and tracked, but do not block, because
- *                          nothing in that tree reaches a deployed environment.
- *
- * An advisory can be waived by adding it to security-policy.json with a written
- * justification and a review date, so every accepted risk is visible in version
- * control and expires rather than quietly becoming permanent.
- */
-
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
@@ -36,13 +20,8 @@ function loadPolicy() {
 }
 
 function runAudit(omitDev) {
-  // The whole invocation is passed as one shell string: npm is a .cmd shim on
-  // Windows, which cannot be spawned without a shell, and passing a separate
-  // argument array alongside `shell: true` is deprecated (DEP0190).
   const command = `npm audit --json${omitDev ? ' --omit=dev' : ''}`;
 
-  // npm audit exits non-zero whenever it finds anything, so its exit code is
-  // ignored and the decision is made from the parsed report.
   const result = spawnSync(command, {
     encoding: 'utf8',
     shell: true,
@@ -102,7 +81,7 @@ function printTree(label, result, failOn) {
 
   for (const finding of result.findings) {
     const flag = finding.waived ? 'WAIVED' : finding.severity.toUpperCase().padEnd(8);
-    console.log(`    ${flag}  ${finding.package}@${finding.range} — ${finding.title}`);
+    console.log(`    ${flag}  ${finding.package}@${finding.range}: ${finding.title}`);
     if (finding.advisory) console.log(`              ${finding.advisory}`);
     if (finding.waived) console.log(`              waiver: ${finding.waiverReason} (review by ${finding.waiverReview})`);
   }
@@ -116,7 +95,7 @@ function markdown(runtime, build, policy) {
     '| --- | --- | --- | --- | --- |',
     ...result.findings.map(
       (f) =>
-        `| \`${f.package}\` | ${f.severity} | [${f.title}](${f.advisory || '#'}) | ${f.fixAvailable ? 'yes' : 'no'} | ${f.waived ? `yes — ${f.waiverReason}` : 'no'} |`,
+        `| \`${f.package}\` | ${f.severity} | [${f.title}](${f.advisory || '#'}) | ${f.fixAvailable ? 'yes' : 'no'} | ${f.waived ? `yes: ${f.waiverReason}` : 'no'} |`,
     ),
   ];
 

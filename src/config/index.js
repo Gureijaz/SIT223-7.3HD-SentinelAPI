@@ -20,7 +20,6 @@ if (!ENVIRONMENTS.includes(env)) {
   throw new Error(`NODE_ENV must be one of ${ENVIRONMENTS.join(', ')}, got "${env}"`);
 }
 
-// Written by `npm run build` at the Build stage; absent during local development.
 let buildInfo = {};
 try {
   buildInfo = require('../generated/build-info.json');

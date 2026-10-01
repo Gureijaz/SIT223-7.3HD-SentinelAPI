@@ -31,8 +31,6 @@ function createApp() {
 
   app.use(metricsMiddleware);
 
-  // Health and metrics endpoints sit outside the rate limiter: Prometheus scrapes
-  // /metrics every 15s and would otherwise trip it during a load spike.
   app.use('/', healthRoutes);
 
   app.use(rateLimit({

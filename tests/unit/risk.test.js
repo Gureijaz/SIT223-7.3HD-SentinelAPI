@@ -16,7 +16,6 @@ function finding(overrides = {}) {
 
 describe('scoreFinding', () => {
   it('scores a brand new high finding from severity alone', () => {
-    // 25 (severity) + 18.75 (cvss fallback = 25 * 0.75) + 0 (age) = 43.75
     expect(scoreFinding(finding(), NOW)).toBe(43.8);
   });
 

@@ -8,7 +8,6 @@ const { registry } = require('../middleware/metrics');
 const router = express.Router();
 const startedAt = Date.now();
 
-/** Liveness probe: cheap, never touches storage, used by the deploy smoke test. */
 router.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -20,7 +19,6 @@ router.get('/health', (_req, res) => {
   });
 });
 
-/** Readiness probe: verifies the storage layer actually answers before taking traffic. */
 router.get('/ready', (_req, res) => {
   try {
     require('../repositories').store.load();

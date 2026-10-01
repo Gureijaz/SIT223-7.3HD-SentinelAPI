@@ -7,8 +7,6 @@ function notFoundHandler(req, _res, next) {
   next(new NotFoundError(`Route ${req.method} ${req.path}`));
 }
 
-// Express identifies error handlers by their four-argument signature, so the
-// unused `next` parameter has to stay.
 function errorHandler(err, req, res, _next) {
   if (err instanceof AppError) {
     logger.warn({ err: { code: err.code, message: err.message }, path: req.path }, 'handled error');

@@ -16,7 +16,7 @@ data/
 logs/
 *.pid
 
-# Secrets — never commit these
+# Secrets, never commit these
 .env
 .env.*
 !.env.example

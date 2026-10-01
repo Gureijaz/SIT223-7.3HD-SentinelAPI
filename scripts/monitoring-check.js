@@ -1,21 +1,5 @@
 'use strict';
 
-/**
- * Monitoring stage verification.
- *
- * Asserts that the observability stack is genuinely wired to the release that
- * was just promoted, rather than merely installed somewhere:
- *
- *   1. Prometheus is healthy and reachable.
- *   2. Both sentinel-api scrape targets (staging + production) are UP.
- *   3. The sentinel alert rules are loaded, and none are unexpectedly firing.
- *   4. Alertmanager is healthy and has the email receiver configured.
- *   5. The version Prometheus sees matches the version we just released.
- *
- * Exits non-zero if monitoring is blind to the new release, which is exactly the
- * situation a Monitoring stage exists to catch.
- */
-
 const fs = require('fs');
 const path = require('path');
 

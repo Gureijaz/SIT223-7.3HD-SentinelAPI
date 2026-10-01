@@ -1,6 +1,6 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job">
-  <description>Sentinel API — seven-stage DevOps pipeline (SIT223/SIT753 7.3HD). Build, Test, Code Quality, Security, Deploy, Release, Monitoring.</description>
+  <description>Sentinel API: seven-stage DevOps pipeline (SIT223/SIT753 7.3HD). Build, Test, Code Quality, Security, Deploy, Release, Monitoring.</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>

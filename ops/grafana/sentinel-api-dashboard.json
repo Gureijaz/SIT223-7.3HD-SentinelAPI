@@ -1,5 +1,5 @@
 {
-  "title": "Sentinel API — Pipeline & Runtime",
+  "title": "Sentinel API | Pipeline & Runtime",
   "uid": "sentinel-api",
   "timezone": "browser",
   "schemaVersion": 39,
@@ -49,7 +49,7 @@
       "targets": [
         {
           "expr": "sentinel_build_info{env=~\"$env\"}",
-          "legendFormat": "{{env}} — v{{version}} build {{build_number}} ({{commit}})",
+          "legendFormat": "{{env}}, v{{version}} build {{build_number}} ({{commit}})",
           "refId": "A"
         }
       ],

@@ -26,8 +26,6 @@ module.exports = {
   ],
   coverageDirectory: '<rootDir>/coverage',
   coverageReporters: ['text', 'text-summary', 'lcov', 'cobertura'],
-  // The Code Quality and Test stages both gate on these numbers: a drop in
-  // coverage fails the build rather than quietly degrading over time.
   coverageThreshold: {
     global: {
       statements: 80,

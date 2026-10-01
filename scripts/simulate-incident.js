@@ -1,20 +1,5 @@
 'use strict';
 
-/**
- * Incident simulation.
- *
- * Deliberately drives a burst of rejected requests at a deployed instance so the
- * SentinelHighErrorRatio rule crosses its threshold, then waits for Prometheus
- * to move the alert through pending into firing and for Alertmanager to accept
- * it. This proves the alerting path end to end - rule evaluation, routing and
- * notification - instead of just asserting that a dashboard exists.
- *
- *   node scripts/simulate-incident.js --url http://localhost:3001 --requests 400
- *
- * Traffic is entirely unauthenticated 401/404 rejections, so nothing is written
- * and no real data is touched.
- */
-
 const { printable } = require('./printable');
 const fs = require('fs');
 const path = require('path');
@@ -106,8 +91,6 @@ async function main() {
   console.log('\nAlert fired:');
   console.log(printable(JSON.stringify({ labels: alert.labels, annotations: alert.annotations, activeAt: alert.activeAt })));
 
-  // Alertmanager polls Prometheus, so give it a moment to receive the alert
-  // before checking that it was routed rather than dropped.
   await sleep(10000);
   const routed = await alertmanagerAlerts();
 

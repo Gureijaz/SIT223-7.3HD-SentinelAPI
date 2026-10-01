@@ -29,8 +29,6 @@ async function register({ email, password, name, role }) {
     throw new ConflictError('An account with that email already exists');
   }
 
-  // The first account to register bootstraps the instance as an admin; every
-  // later account defaults to analyst unless an admin explicitly asks otherwise.
   const isBootstrap = usersRepository.count() === 0;
 
   const user = {
@@ -50,8 +48,6 @@ async function register({ email, password, name, role }) {
 async function login({ email, password }) {
   const user = usersRepository.findByEmail(email);
 
-  // Compare against a dummy hash when the account is missing so that a failed
-  // lookup and a wrong password take the same amount of time.
   const hash = user ? user.passwordHash : '$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvali';
   const matches = await bcrypt.compare(password, hash);
 

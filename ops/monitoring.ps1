@@ -1,19 +1,3 @@
-<#
-.SYNOPSIS
-    Starts, stops and inspects the local monitoring stack (Prometheus + Alertmanager).
-
-.DESCRIPTION
-    The Monitoring stage of the pipeline assumes Prometheus is on :9090 and
-    Alertmanager on :9093. Both ship as standalone Windows executables, so no
-    container runtime is involved; this script just runs them against the configs
-    in ops/ and keeps their data directories out of the repository.
-
-.EXAMPLE
-    powershell -ExecutionPolicy Bypass -File ops\monitoring.ps1 -Action start
-    powershell -ExecutionPolicy Bypass -File ops\monitoring.ps1 -Action status
-    powershell -ExecutionPolicy Bypass -File ops\monitoring.ps1 -Action stop
-#>
-
 param(
     [ValidateSet('start', 'stop', 'status', 'restart')]
     [string]$Action = 'status'
@@ -61,8 +45,6 @@ function Start-Stack {
     if (Get-Process alertmanager -ErrorAction SilentlyContinue) {
         Write-Host 'Alertmanager is already running.'
     } else {
-        # Run from the alertmanager config directory so smtp_auth_password_file
-        # resolves relative to the config rather than to the caller's location.
         Start-Process -FilePath $alertmanagerExe.FullName -WindowStyle Hidden -WorkingDirectory (Join-Path $opsRoot 'alertmanager') -ArgumentList @(
             "--config.file=alertmanager.yml",
             "--storage.path=$amData",

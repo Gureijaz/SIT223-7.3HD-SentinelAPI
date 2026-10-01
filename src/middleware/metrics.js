@@ -59,13 +59,10 @@ buildInfo.set(
   1,
 );
 
-/** Records duration, count and error metrics for every request that passes through. */
 function metricsMiddleware(req, res, next) {
   const stop = httpRequestDuration.startTimer();
 
   res.on('finish', () => {
-    // Use the matched Express route so high-cardinality path params (ids) do not
-    // explode the label space in Prometheus.
     const route = req.route ? `${req.baseUrl}${req.route.path}` : req.path;
     const labels = { method: req.method, route, status_code: res.statusCode };
 

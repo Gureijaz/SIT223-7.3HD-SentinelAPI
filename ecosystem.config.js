@@ -1,17 +1,5 @@
 'use strict';
 
-/**
- * PM2 process definitions for the two deployment environments.
- *
- * Staging (3001) is what the Deploy stage releases to and smoke-tests; production
- * (3000) is what the Release stage promotes to once staging is green. Both run
- * from the same checked-out artefact, so the only difference between them is
- * configuration - the classic build-once/deploy-many rule.
- *
- * Secrets are never written here: JWT_SECRET is injected by Jenkins from its
- * credential store at deploy time and inherited by the child process.
- */
-
 const path = require('path');
 
 const shared = {

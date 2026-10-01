@@ -25,7 +25,7 @@ Target environment: Windows 11, Jenkins running as a Windows service as
 > `'npm' is not recognized` even though it works fine in your own terminal.
 > After installing machine-wide, run `Restart-Service Jenkins`.
 
-Required Jenkins plugins — **Manage Jenkins → Plugins → Available**:
+Required Jenkins plugins (**Manage Jenkins → Plugins → Available**):
 
 - Pipeline, Git, Credentials Binding *(included in "Install suggested plugins")*
 - **Email Extension Plugin**
@@ -55,7 +55,7 @@ the Build, Test and Code Quality stages will work.
 1. Sign in at <https://sonarcloud.io> with GitHub.
 2. **+ → Analyze new project** → pick `SIT223-7.3HD-SentinelAPI` → **Set Up**.
 3. Choose **With Jenkins** (or "Other CI"); the important part is the token.
-4. **My Account → Security → Generate Token**. Copy it — you only see it once.
+4. **My Account → Security → Generate Token**. Copy it, you only see it once.
 5. Check the project key and organization match
    [`sonar-project.properties`](../sonar-project.properties):
 
@@ -66,7 +66,7 @@ the Build, Test and Code Quality stages will work.
 
    SonarCloud shows both on the project's **Information** page. Edit the file if
    they differ, then commit and push.
-6. In **Administration → Analysis Method**, turn *Automatic Analysis* **off** —
+6. In **Administration → Analysis Method**, turn *Automatic Analysis* **off**,
    otherwise SonarCloud rejects the CI-based analysis the pipeline submits.
 
 > The pipeline does **not** use `waitForQualityGate`. That step waits for
@@ -84,10 +84,10 @@ Three secret-text credentials, created at
 | ID | Secret |
 | --- | --- |
 | `sonarcloud-token` | The SonarCloud token from step 2 |
-| `github-token` | GitHub PAT with `repo` scope — <https://github.com/settings/tokens> |
+| `github-token` | GitHub PAT with `repo` scope: <https://github.com/settings/tokens> |
 | `sentinel-jwt-secret` | Any long random string. Generate one with:<br>`node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
 
-The IDs must match exactly — the Jenkinsfile binds them by name.
+The IDs must match exactly. The Jenkinsfile binds them by name.
 
 ### Email notifications
 
@@ -99,7 +99,7 @@ The IDs must match exactly — the Jenkinsfile binds them by name.
 - Default recipient: your email
 
 Also fill in the plain **E-mail Notification** section below it and tick
-**Use SMTP Authentication** under its *Advanced* settings — the two sections have
+**Use SMTP Authentication** under its *Advanced* settings, because the two sections have
 separate credentials, and the test button only exercises the second one.
 
 ---
@@ -125,11 +125,11 @@ powershell -ExecutionPolicy Bypass -File jenkins\setup-jenkins.ps1 -JenkinsUser 
 ## 5. Monitoring stack
 
 ```powershell
-# download the binaries once — see ops/README.md for the full command
+# download the binaries once, see ops/README.md for the full command
 powershell -ExecutionPolicy Bypass -File ops\monitoring.ps1 -Action start
 ```
 
-**(manual)** Create the Alertmanager SMTP password file — this holds a credential,
+**(manual)** Create the Alertmanager SMTP password file. This holds a credential,
 so it is deliberately not committed and not scripted:
 
 ```powershell
@@ -148,10 +148,10 @@ Open `http://localhost:8080/job/sentinel-api-pipeline/` → **Build with Paramet
 | Parameter | For the first run | For the demo video |
 | --- | --- | --- |
 | `RELEASE_TO_PRODUCTION` | ✔ | ✔ |
-| `RUN_INCIDENT_SIMULATION` | ✘ | ✔ — this is what proves the alert path |
+| `RUN_INCIDENT_SIMULATION` | ✘ | ✔ (this is what proves the alert path) |
 | `FAIL_ON_QUALITY_GATE` | ✔ | ✔ |
 
-A full run with the incident simulation takes roughly 8–12 minutes; without it,
+A full run with the incident simulation takes roughly 8 to 12 minutes; without it,
 about 4.
 
 ### What success looks like
@@ -170,25 +170,25 @@ about 4.
 
 ## Troubleshooting
 
-**`'npm' is not recognized`** — Node is on the user PATH but not the machine PATH.
+**`'npm' is not recognized`**: Node is on the user PATH but not the machine PATH.
 See the `--scope machine` note in step 0, then `Restart-Service Jenkins`.
 
-**`npm ci` fails with `EPERM` or a lock error** — the Jenkins service and your own
+**`npm ci` fails with `EPERM` or a lock error**: the Jenkins service and your own
 shell are sharing an npm cache. The Jenkinsfile already redirects it with
 `npm_config_cache` inside the workspace; make sure you have not overridden
 `npm_config_cache` globally.
 
-**Quality gate step reports `.scannerwork/report-task.txt not found`** — the
+**Quality gate step reports `.scannerwork/report-task.txt not found`**: the
 scanner did not run. Usually the SonarCloud token is missing or the project key in
 `sonar-project.properties` does not match the project.
 
-**`gh release create` fails with 403** — the `github-token` credential is missing
+**`gh release create` fails with 403**: the `github-token` credential is missing
 the `repo` scope, or has expired.
 
-**Deploy stage fails with `EADDRINUSE` on 3000 or 3001** — you have your own PM2
+**Deploy stage fails with `EADDRINUSE` on 3000 or 3001**: you have your own PM2
 instances running. PM2 keeps a **separate daemon per Windows account**, and the
 Jenkins service runs as `Local System`, so its daemon cannot see or reload the
-processes your user account started — it just tries to bind a port someone else
+processes your user account started. It just tries to bind a port someone else
 already holds. Before a Jenkins run, clear yours:
 
 ```powershell
@@ -197,17 +197,17 @@ npx pm2 kill
 ```
 
 To inspect what Jenkins' own daemon is running, use a pipeline step or a
-`PsExec -s` shell — `npx pm2 list` in your own terminal shows *your* daemon, not
+`PsExec -s` shell. `npx pm2 list` in your own terminal shows *your* daemon, not
 Jenkins'.
 
-**Deploy stage passes but the smoke test times out** — PM2 started the process but
+**Deploy stage passes but the smoke test times out**: PM2 started the process but
 it exited. `npx pm2 logs sentinel-api-staging --lines 100`. The usual cause is a
 bad `JWT_SECRET` binding, or the port being taken as above.
 
-**Monitoring stage fails with `no sentinel-api targets are configured`** —
+**Monitoring stage fails with `no sentinel-api targets are configured`**:
 Prometheus is not running, or is running against a different config file. Restart
 it with `ops\monitoring.ps1 -Action restart`.
 
-**Incident simulation never fires** — the alert needs the error *ratio* over 25%
+**Incident simulation never fires**: the alert needs the error *ratio* over 25%
 across a 2-minute window. If staging has just served a large volume of successful
 smoke-test traffic, raise `--requests`, or wait for the rate window to move on.
