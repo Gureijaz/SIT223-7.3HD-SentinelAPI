@@ -81,10 +81,12 @@ describe('GET /api/auth/me', () => {
   });
 
   it('returns 401 for a token that is not a JWT', async () => {
-    await request(app).get('/api/auth/me').set(auth('garbage')).expect(401);
+    const response = await request(app).get('/api/auth/me').set(auth('garbage')).expect(401);
+    expect(response.status).toBe(401);
   });
 
   it('returns 401 when the Authorization scheme is not Bearer', async () => {
-    await request(app).get('/api/auth/me').set({ Authorization: 'Basic abc123' }).expect(401);
+    const response = await request(app).get('/api/auth/me').set({ Authorization: 'Basic abc123' }).expect(401);
+    expect(response.status).toBe(401);
   });
 });

@@ -14,7 +14,8 @@ describe('GET /health', () => {
   });
 
   it('does not require authentication, so probes can reach it', async () => {
-    await request(app).get('/health').expect(200);
+    const response = await request(app).get('/health').expect(200);
+    expect(response.status).toBe(200);
   });
 });
 
@@ -75,5 +76,17 @@ describe('security headers', () => {
     expect(response.headers['x-powered-by']).toBeUndefined();
     expect(response.headers['x-content-type-options']).toBe('nosniff');
     expect(response.headers['x-frame-options']).toBeDefined();
+  });
+});
+
+describe('CORS', () => {
+  it('allows a configured origin', async () => {
+    const response = await request(app).get('/health').set('Origin', 'https://sentinel.test').expect(200);
+    expect(response.headers['access-control-allow-origin']).toBe('https://sentinel.test');
+  });
+
+  it('does not allow an unlisted origin', async () => {
+    const response = await request(app).get('/health').set('Origin', 'https://evil.test').expect(200);
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
   });
 });

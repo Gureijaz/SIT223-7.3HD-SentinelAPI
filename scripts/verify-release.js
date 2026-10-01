@@ -12,6 +12,8 @@
  *   node scripts/verify-release.js --url http://localhost:3000 --version 1.0.42 --build 42
  */
 
+const { printable } = require('./printable');
+
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((pairs, arg, i, all) => {
     if (arg.startsWith('--')) pairs.push([arg.slice(2), all[i + 1]]);
@@ -46,24 +48,23 @@ async function main() {
       const buildOk = !EXPECTED_BUILD || String(last.build) === String(EXPECTED_BUILD);
 
       if (versionOk && buildOk) {
-        console.log(`Production is serving version ${last.version}, build ${last.build}, commit ${last.commit}.`);
-        console.log(`Uptime since reload: ${last.uptimeSeconds}s`);
+        console.log(printable(`Production is serving version ${last.version}, build ${last.build}, commit ${last.commit}.`));
+        console.log(printable(`Uptime since reload: ${last.uptimeSeconds}s`));
         console.log('\nRELEASE VERIFIED.');
         return;
       }
 
-      console.log(`  attempt ${attempt}: serving version=${last.version} build=${last.build} — waiting for the reload to complete`);
+      console.log(printable(`  attempt ${attempt}: serving version=${last.version} build=${last.build}, waiting for the reload`));
     } catch (err) {
-      console.log(`  attempt ${attempt}: ${err.message}`);
+      console.log(printable(`  attempt ${attempt}: ${err.message}`));
     }
 
     await sleep(2000);
   }
 
+  const seen = last ? `version=${last.version} build=${last.build}` : 'no healthy response';
   console.error(
-    `\nRELEASE VERIFICATION FAILED: after ${ATTEMPTS} attempts production reports ` +
-      `${last ? `version=${last.version} build=${last.build}` : 'no healthy response'}, ` +
-      `expected version=${EXPECTED_VERSION} build=${EXPECTED_BUILD}.`,
+    printable(`\nRELEASE VERIFICATION FAILED: after ${ATTEMPTS} attempts production reports ${seen}, expected version=${EXPECTED_VERSION} build=${EXPECTED_BUILD}.`),
   );
   process.exitCode = 1;
 }

@@ -42,8 +42,16 @@ function compress(stagingDir, archivePath) {
   // staging directory itself becomes a folder inside the zip.
   const contentsGlob = path.join(stagingDir, '*');
 
+  const powershell = path.join(
+    process.env.SystemRoot || 'C:\\Windows',
+    'System32',
+    'WindowsPowerShell',
+    'v1.0',
+    'powershell.exe',
+  );
+
   execFileSync(
-    'powershell',
+    powershell,
     [
       '-NoProfile',
       '-NonInteractive',

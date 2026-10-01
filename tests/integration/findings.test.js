@@ -41,7 +41,8 @@ describe('POST /api/findings', () => {
   });
 
   it('requires authentication', async () => {
-    await request(app).post('/api/findings').send(SAMPLE_FINDING).expect(401);
+    const response = await request(app).post('/api/findings').send(SAMPLE_FINDING).expect(401);
+    expect(response.status).toBe(401);
   });
 });
 
@@ -108,7 +109,8 @@ describe('GET /api/findings', () => {
   });
 
   it('rejects an out-of-range limit', async () => {
-    await request(app).get('/api/findings?limit=5000').set(auth(analyst.token)).expect(400);
+    const response = await request(app).get('/api/findings?limit=5000').set(auth(analyst.token)).expect(400);
+    expect(response.status).toBe(400);
   });
 });
 
@@ -168,11 +170,13 @@ describe('PATCH /api/findings/:id', () => {
   it('lets an admin update anyone\u2019s finding', async () => {
     const created = await createFinding(analyst.token);
 
-    await request(app)
+    const response = await request(app)
       .patch(`/api/findings/${created.id}`)
       .set(auth(admin.token))
       .send({ status: 'resolved' })
       .expect(200);
+
+    expect(response.body.status).toBe('resolved');
   });
 
   it('stops an analyst editing a finding they did not report', async () => {
@@ -190,11 +194,13 @@ describe('PATCH /api/findings/:id', () => {
   it('rejects an empty patch body', async () => {
     const created = await createFinding(analyst.token);
 
-    await request(app)
+    const response = await request(app)
       .patch(`/api/findings/${created.id}`)
       .set(auth(analyst.token))
       .send({})
       .expect(400);
+
+    expect(response.body.error.code).toBe('VALIDATION_ERROR');
   });
 });
 
@@ -202,8 +208,11 @@ describe('DELETE /api/findings/:id', () => {
   it('lets an admin delete a finding', async () => {
     const created = await createFinding(analyst.token);
 
-    await request(app).delete(`/api/findings/${created.id}`).set(auth(admin.token)).expect(204);
-    await request(app).get(`/api/findings/${created.id}`).set(auth(admin.token)).expect(404);
+    const deleted = await request(app).delete(`/api/findings/${created.id}`).set(auth(admin.token)).expect(204);
+    const fetched = await request(app).get(`/api/findings/${created.id}`).set(auth(admin.token)).expect(404);
+
+    expect(deleted.status).toBe(204);
+    expect(fetched.body.error.code).toBe('NOT_FOUND');
   });
 
   it('refuses an analyst', async () => {
@@ -218,9 +227,11 @@ describe('DELETE /api/findings/:id', () => {
   });
 
   it('returns 404 when deleting something that is not there', async () => {
-    await request(app)
+    const response = await request(app)
       .delete('/api/findings/00000000-0000-0000-0000-000000000000')
       .set(auth(admin.token))
       .expect(404);
+
+    expect(response.body.error.code).toBe('NOT_FOUND');
   });
 });

@@ -10,7 +10,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
 
 const pkg = require('../package.json');
 
@@ -18,7 +17,17 @@ function gitCommit() {
   if (process.env.GIT_COMMIT) return process.env.GIT_COMMIT;
 
   try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    const gitDir = path.join(process.cwd(), '.git');
+    const head = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf8').trim();
+    if (!head.startsWith('ref: ')) return head;
+
+    const ref = head.slice(5);
+    const loose = path.join(gitDir, ref);
+    if (fs.existsSync(loose)) return fs.readFileSync(loose, 'utf8').trim();
+
+    const packed = fs.readFileSync(path.join(gitDir, 'packed-refs'), 'utf8');
+    const line = packed.split(/\r?\n/).find((l) => l.endsWith(` ${ref}`));
+    return line ? line.split(' ')[0] : 'unknown';
   } catch {
     return 'unknown';
   }

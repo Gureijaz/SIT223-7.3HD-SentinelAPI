@@ -1,5 +1,6 @@
 'use strict';
 
+const { randomBytes } = require('crypto');
 const request = require('supertest');
 
 const createApp = require('../../src/app');
@@ -7,15 +8,19 @@ const { store } = require('../../src/repositories');
 
 const app = createApp();
 
+function testPassword() {
+  return `Aa1${randomBytes(12).toString('hex')}`;
+}
+
 const ADMIN = {
   email: 'admin@sentinel.test',
-  password: 'CorrectHorseBattery1',
+  password: testPassword(),
   name: 'Admin User',
 };
 
 const ANALYST = {
   email: 'analyst@sentinel.test',
-  password: 'AnotherStrongPass9',
+  password: testPassword(),
   name: 'Analyst User',
 };
 

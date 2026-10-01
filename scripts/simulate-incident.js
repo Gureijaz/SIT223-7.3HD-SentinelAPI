@@ -15,6 +15,7 @@
  * and no real data is touched.
  */
 
+const { printable } = require('./printable');
 const fs = require('fs');
 const path = require('path');
 
@@ -85,7 +86,7 @@ async function waitForAlert() {
       const state = alerts[0].state;
 
       if (state !== lastState) {
-        console.log(`  [${new Date().toISOString()}] ${ALERT_NAME} -> ${state}`);
+        console.log(`  [${new Date().toISOString()}] ${ALERT_NAME} -> ${printable(state)}`);
         lastState = state;
       }
 
@@ -103,7 +104,7 @@ async function main() {
   const alert = await waitForAlert();
 
   console.log('\nAlert fired:');
-  console.log(JSON.stringify({ labels: alert.labels, annotations: alert.annotations, activeAt: alert.activeAt }, null, 2));
+  console.log(printable(JSON.stringify({ labels: alert.labels, annotations: alert.annotations, activeAt: alert.activeAt })));
 
   // Alertmanager polls Prometheus, so give it a moment to receive the alert
   // before checking that it was routed rather than dropped.

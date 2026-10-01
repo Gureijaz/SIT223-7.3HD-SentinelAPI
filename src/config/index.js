@@ -37,6 +37,7 @@ const config = {
     secret: requiredInProduction('JWT_SECRET', process.env.JWT_SECRET, 'dev-only-insecure-secret'),
     expiresIn: process.env.JWT_EXPIRES_IN || '2h',
   },
+  corsOrigins: (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
   bcryptRounds: Number(process.env.BCRYPT_ROUNDS || (env === 'test' ? 4 : 10)),
   rateLimit: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),

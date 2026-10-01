@@ -21,7 +21,7 @@ function createApp() {
 
   app.disable('x-powered-by');
   app.use(helmet());
-  app.use(cors());
+  app.use(cors({ origin: config.corsOrigins.length ? config.corsOrigins : false }));
   app.use(compression());
   app.use(express.json({ limit: '256kb' }));
 
