@@ -30,8 +30,9 @@ router.get('/ready', (_req, res) => {
 
 router.get('/metrics', async (_req, res, next) => {
   try {
+    const body = await registry.metrics();
     res.set('Content-Type', registry.contentType);
-    res.status(200).send(await registry.metrics());
+    res.status(200).send(body);
   } catch (err) {
     next(err);
   }
