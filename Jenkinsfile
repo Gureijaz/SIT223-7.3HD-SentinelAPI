@@ -139,7 +139,9 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 withCredentials([string(credentialsId: 'sentinel-jwt-secret', variable: 'JWT_SECRET')]) {
-                    bat 'npx pm2 startOrReload ecosystem.config.js --only sentinel-api-staging --update-env'
+                    withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
+                        bat 'npx pm2 startOrReload ecosystem.config.js --only sentinel-api-staging --update-env'
+                    }
                 }
                 bat 'npx pm2 list'
                 bat "node scripts/smoke-test.js --url %STAGING_URL% --mode full"
@@ -175,7 +177,9 @@ pipeline {
                 }
 
                 withCredentials([string(credentialsId: 'sentinel-jwt-secret', variable: 'JWT_SECRET')]) {
-                    bat 'npx pm2 startOrReload ecosystem.config.js --only sentinel-api-production --update-env'
+                    withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
+                        bat 'npx pm2 startOrReload ecosystem.config.js --only sentinel-api-production --update-env'
+                    }
                 }
 
                 bat 'npx pm2 list'

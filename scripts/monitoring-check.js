@@ -34,9 +34,25 @@ function query(expr) {
   return get(PROMETHEUS_URL, `/api/v1/query?query=${encodeURIComponent(expr)}`);
 }
 
-async function check(name, fn) {
+const SETTLE_DEADLINE = Date.now() + Number(process.env.MONITOR_SETTLE_MS || 120000);
+const SETTLE_INTERVAL_MS = 5000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function settled(fn) {
+  for (;;) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (Date.now() >= SETTLE_DEADLINE) throw err;
+      await sleep(SETTLE_INTERVAL_MS);
+    }
+  }
+}
+
+async function check(name, fn, { wait = false } = {}) {
   try {
-    const detail = await fn();
+    const detail = wait ? await settled(fn) : await fn();
     results.push({ name, ok: true, detail: detail || null });
     console.log(`  PASS  ${name}${detail ? ` - ${detail}` : ''}`);
   } catch (err) {
@@ -65,7 +81,7 @@ async function main() {
     }
 
     return targets.map((t) => `${t.labels.env || t.labels.instance}=up`).join(', ');
-  });
+  }, { wait: true });
 
   await check('sentinel alert rules are loaded', async () => {
     const body = await get(PROMETHEUS_URL, '/api/v1/rules');
@@ -81,7 +97,7 @@ async function main() {
     }
 
     return `${rules.length} rules loaded (${rules.map((r) => r.name).join(', ')})`;
-  });
+  }, { wait: true });
 
   await check('Alertmanager is healthy with a configured receiver', async () => {
     await get(ALERTMANAGER_URL, '/-/healthy');
@@ -100,7 +116,7 @@ async function main() {
     if (!Number.isFinite(value)) throw new Error('sentinel_http_requests_total has no samples yet');
 
     return `sentinel_http_requests_total = ${value}`;
-  });
+  }, { wait: true });
 
   await check('the released version is visible to Prometheus', async () => {
     const body = await query('sentinel_build_info');
@@ -115,7 +131,7 @@ async function main() {
     }
 
     return versions.join(', ');
-  });
+  }, { wait: true });
 
   await check('error ratio is within the alert threshold', async () => {
     const body = await query(
