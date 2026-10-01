@@ -173,6 +173,8 @@ about 4.
 **`'npm' is not recognized`**: Node is on the user PATH but not the machine PATH.
 See the `--scope machine` note in step 0, then `Restart-Service Jenkins`.
 
+**Test stage reports `No tests found`**: Jenkins keeps workspaces under a dot-folder (`...\.jenkins\workspace`) and Jest's `testMatch` globs do not match inside dot-folders. `jest.config.js` uses `testRegex` for this reason, so keep it.
+
 **`npm ci` fails with `EPERM` or a lock error**: the Jenkins service and your own
 shell are sharing an npm cache. The Jenkinsfile already redirects it with
 `npm_config_cache` inside the workspace; make sure you have not overridden

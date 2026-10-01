@@ -10,13 +10,13 @@ module.exports = {
       displayName: 'unit',
       testEnvironment: 'node',
       setupFiles: ['<rootDir>/tests/setup-env.js'],
-      testMatch: ['<rootDir>/tests/unit/**/*.test.js'],
+      testRegex: 'tests/unit/.*\\.test\\.js$',
     },
     {
       displayName: 'integration',
       testEnvironment: 'node',
       setupFiles: ['<rootDir>/tests/setup-env.js'],
-      testMatch: ['<rootDir>/tests/integration/**/*.test.js'],
+      testRegex: 'tests/integration/.*\\.test\\.js$',
     },
   ],
   collectCoverageFrom: [
@@ -41,7 +41,7 @@ module.exports = {
       outputName: 'junit.xml',
       classNameTemplate: '{classname}',
       titleTemplate: '{title}',
-      ancestorSeparator: ' › ',
+      ancestorSeparator: ' â€º ',
     }],
   ],
 };
