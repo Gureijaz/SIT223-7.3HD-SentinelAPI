@@ -45,7 +45,7 @@ npm test
 npm run lint
 ```
 
-122 tests across two suites should pass and ESLint should be silent. If this works,
+123 tests across two suites should pass and ESLint should be silent. If this works,
 the Build, Test and Code Quality stages will work.
 
 ---
@@ -159,7 +159,7 @@ about 4.
 | Stage | Evidence |
 | --- | --- |
 | Build | `dist/sentinel-api-1.0.N-build.N-<commit>.zip` archived and fingerprinted |
-| Test | Test Result trend graph; 122 tests; coverage report linked on the build page |
+| Test | Test Result trend graph; 123 tests; coverage report linked on the build page |
 | Code Quality | `QUALITY GATE PASSED` in the log, dashboard link to SonarCloud |
 | Security | `SECURITY GATE PASSED`, Trivy finds no HIGH/CRITICAL |
 | Deploy | `12/12 checks passed` against <http://localhost:3001> |

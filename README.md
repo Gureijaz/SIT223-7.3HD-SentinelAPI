@@ -16,7 +16,7 @@ on something real in this codebase.
 | **Validation** | zod schemas at every request boundary |
 | **Storage** | Atomic file-backed document store (no database service to provision) |
 | **Observability** | `prom-client` metrics, structured `pino` logs, liveness + readiness probes |
-| **Tests** | Jest (unit) + supertest (integration), 122 cases, coverage gated |
+| **Tests** | Jest (unit) + supertest (integration), 123 cases, coverage gated |
 | **Pipeline** | Jenkins declarative pipeline, 7 stages |
 
 ---

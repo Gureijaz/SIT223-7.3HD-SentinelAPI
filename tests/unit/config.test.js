@@ -130,8 +130,16 @@ describe('build info', () => {
     expect(release).toEqual({ version: '9.9.9', buildNumber: '42', commit: 'abc12345', builtAt: info.builtAt });
   });
 
-  it('lets environment variables win over the stamped build', () => {
+  it('prefers the stamped build over stale environment variables', () => {
     const { release } = loadConfig({ APP_VERSION: '1.2.3', BUILD_NUMBER: '7', GIT_COMMIT: 'feedbeef' }, info);
+
+    expect(release.version).toBe('9.9.9');
+    expect(release.buildNumber).toBe('42');
+    expect(release.commit).toBe('abc12345');
+  });
+
+  it('falls back to environment variables when nothing was stamped', () => {
+    const { release } = loadConfig({ APP_VERSION: '1.2.3', BUILD_NUMBER: '7', GIT_COMMIT: 'feedbeef' });
 
     expect(release.version).toBe('1.2.3');
     expect(release.buildNumber).toBe('7');

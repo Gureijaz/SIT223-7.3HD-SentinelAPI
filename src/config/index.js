@@ -43,9 +43,9 @@ const config = {
     max: Number(process.env.RATE_LIMIT_MAX || (env === 'test' ? 100000 : 300)),
   },
   release: {
-    version: process.env.APP_VERSION || buildInfo.version || require('../../package.json').version,
-    buildNumber: process.env.BUILD_NUMBER || buildInfo.buildNumber || 'local',
-    commit: process.env.GIT_COMMIT || buildInfo.shortCommit || 'unknown',
+    version: buildInfo.version || process.env.APP_VERSION || require('../../package.json').version,
+    buildNumber: buildInfo.buildNumber || process.env.BUILD_NUMBER || 'local',
+    commit: buildInfo.shortCommit || process.env.GIT_COMMIT || 'unknown',
     builtAt: buildInfo.builtAt || null,
   },
 };
