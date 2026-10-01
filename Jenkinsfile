@@ -118,10 +118,9 @@ pipeline {
                 bat 'npm run security:audit'
 
                 script {
-                    def trivyInstalled = bat(script: '@where trivy >nul 2>&1 && echo yes || echo no',
-                                             returnStdout: true).trim()
+                    def trivyFound = bat(script: '@where trivy >nul 2>&1', returnStatus: true) == 0
 
-                    if (trivyInstalled == 'yes') {
+                    if (trivyFound) {
                         bat 'if not exist reports\\security mkdir reports\\security'
                         bat 'trivy fs --scanners vuln,secret,misconfig --format json --output reports/security/trivy-report.json .'
                         bat 'trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 .'
