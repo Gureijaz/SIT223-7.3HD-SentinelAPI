@@ -60,6 +60,7 @@ function main() {
   const artefactName = `${pkg.name}-${buildInfo.version}-build.${buildInfo.buildNumber}-${buildInfo.shortCommit}.zip`;
   const archivePath = path.join(distDir, artefactName);
 
+  fs.rmSync(distDir, { recursive: true, force: true });
   fs.mkdirSync(distDir, { recursive: true });
   stage(stagingDir);
   compress(stagingDir, archivePath);
