@@ -5,11 +5,11 @@ runtime, no service install. The Monitoring stage of the pipeline talks to both
 over HTTP and fails if either is blind to the release that was just promoted.
 
 ```
-sentinel-api :3001 (staging)     ─┐
-sentinel-api :3000 (production)  ─┼─► Prometheus :9090 ─► Alertmanager :9093 ─► email
-                                  │        │
-                                  │        └─► Grafana :3030 (optional dashboard)
-                                  └─ /metrics scraped every 15s
+sentinel-api :3001 (staging)     --+
+sentinel-api :3000 (production)  --+--> Prometheus :9090 --> Alertmanager :9093 --> email
+                                   |          |
+                                   |          +--> Grafana :3030 (optional dashboard)
+                                   +-- /metrics scraped every 15s
 ```
 
 ## Contents
@@ -41,7 +41,7 @@ Then create the SMTP password file. **This is the one step that cannot be
 automated**, because it holds a credential:
 
 ```powershell
-# Google Account → Security → 2-Step Verification → App passwords
+# Google Account > Security > 2-Step Verification > App passwords
 Set-Content -Path ops\alertmanager\smtp-password.txt -Value 'your-16-char-app-password' -NoNewline
 ```
 

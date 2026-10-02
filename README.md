@@ -24,7 +24,7 @@ on something real in this codebase.
 ## The pipeline
 
 ```
-Checkout → Build → Test → Code Quality → Security → Deploy → Release → Monitoring
+Checkout > Build > Test > Code Quality > Security > Deploy > Release > Monitoring
 ```
 
 | # | Stage | What it does | Tools |
@@ -95,12 +95,12 @@ curl -X POST http://localhost:3000/api/findings \
 `scripts`-free business logic lives in [`src/services/risk.js`](src/services/risk.js).
 A finding scores 0 to 100 by blending three signals:
 
-- **severity**: a fixed weight per level (critical 40 … informational 1);
+- **severity**: a fixed weight per level (critical 40 down to informational 1);
 - **CVSS**: the supplied base score, times three; when absent, 75% of the severity weight stands in;
 - **age**: up to 30 points, ramping linearly and capping at 90 days unresolved.
 
-Remediation progress then damps the total: `triaged` ×0.9, `in_progress` ×0.6,
-`accepted_risk` ×0.3, `resolved` ×0. So an untouched critical that has aged out
+Remediation progress then damps the total: `triaged` x0.9, `in_progress` x0.6,
+`accepted_risk` x0.3, `resolved` x0. So an untouched critical that has aged out
 scores 100, and the same finding scores 0 once it is closed.
 
 ---

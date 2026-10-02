@@ -25,7 +25,7 @@ Target environment: Windows 11, Jenkins running as a Windows service as
 > `'npm' is not recognized` even though it works fine in your own terminal.
 > After installing machine-wide, run `Restart-Service Jenkins`.
 
-Required Jenkins plugins (**Manage Jenkins → Plugins → Available**):
+Required Jenkins plugins (**Manage Jenkins > Plugins > Available**):
 
 - Pipeline, Git, Credentials Binding *(included in "Install suggested plugins")*
 - **Email Extension Plugin**
@@ -53,9 +53,9 @@ the Build, Test and Code Quality stages will work.
 ## 2. SonarCloud project **(manual)**
 
 1. Sign in at <https://sonarcloud.io> with GitHub.
-2. **+ → Analyze new project** → pick `SIT223-7.3HD-SentinelAPI` → **Set Up**.
+2. **+ > Analyze new project** > pick `SIT223-7.3HD-SentinelAPI` > **Set Up**.
 3. Choose **With Jenkins** (or "Other CI"); the important part is the token.
-4. **My Account → Security → Generate Token**. Copy it, you only see it once.
+4. **My Account > Security > Generate Token**. Copy it, you only see it once.
 5. Check the project key and organization match
    [`sonar-project.properties`](../sonar-project.properties):
 
@@ -66,7 +66,7 @@ the Build, Test and Code Quality stages will work.
 
    SonarCloud shows both on the project's **Information** page. Edit the file if
    they differ, then commit and push.
-6. In **Administration → Analysis Method**, turn *Automatic Analysis* **off**,
+6. In **Administration > Analysis Method**, turn *Automatic Analysis* **off**,
    otherwise SonarCloud rejects the CI-based analysis the pipeline submits.
 
 > The pipeline does **not** use `waitForQualityGate`. That step waits for
@@ -78,7 +78,7 @@ the Build, Test and Code Quality stages will work.
 ## 3. Jenkins credentials **(manual)**
 
 Three secret-text credentials, created at
-**Manage Jenkins → Credentials → System → Global credentials → Add Credentials**
+**Manage Jenkins > Credentials > System > Global credentials > Add Credentials**
 (*Kind: Secret text* for all three):
 
 | ID | Secret |
@@ -91,11 +91,11 @@ The IDs must match exactly. The Jenkinsfile binds them by name.
 
 ### Email notifications
 
-**Manage Jenkins → System → Extended E-mail Notification**:
+**Manage Jenkins > System > Extended E-mail Notification**:
 
 - SMTP server `smtp.gmail.com`, port `587`, **Use TLS** ticked
 - Credentials: your Gmail address + a **Google app password**
-  (Google Account → Security → 2-Step Verification → App passwords)
+  (Google Account > Security > 2-Step Verification > App passwords)
 - Default recipient: your email
 
 Also fill in the plain **E-mail Notification** section below it and tick
@@ -113,12 +113,12 @@ Jenkins; nothing is written to disk):
 powershell -ExecutionPolicy Bypass -File jenkins\setup-jenkins.ps1 -JenkinsUser <your-jenkins-username>
 ```
 
-…or do it by hand: **New Item → Pipeline**, name it `sentinel-api-pipeline`, then
+...or do it by hand: **New Item > Pipeline**, name it `sentinel-api-pipeline`, then
 
-- **Build Triggers** → *Poll SCM* → `H/5 * * * *`
-- **Pipeline** → *Pipeline script from SCM* → Git
-  → `https://github.com/Gureijaz/SIT223-7.3HD-SentinelAPI.git`
-  → branch `*/main` → Script Path `Jenkinsfile`
+- **Build Triggers** > *Poll SCM* > `H/5 * * * *`
+- **Pipeline** > *Pipeline script from SCM* > Git
+  > `https://github.com/Gureijaz/SIT223-7.3HD-SentinelAPI.git`
+  > branch `*/main` > Script Path `Jenkinsfile`
 
 ---
 
@@ -143,13 +143,13 @@ and both app instances UP once the pipeline has deployed them.
 
 ## 6. Run it
 
-Open `http://localhost:8080/job/sentinel-api-pipeline/` → **Build with Parameters**.
+Open `http://localhost:8080/job/sentinel-api-pipeline/` > **Build with Parameters**.
 
 | Parameter | For the first run | For the demo video |
 | --- | --- | --- |
-| `RELEASE_TO_PRODUCTION` | ✔ | ✔ |
-| `RUN_INCIDENT_SIMULATION` | ✘ | ✔ (this is what proves the alert path) |
-| `FAIL_ON_QUALITY_GATE` | ✔ | ✔ |
+| `RELEASE_TO_PRODUCTION` | on | on |
+| `RUN_INCIDENT_SIMULATION` | off | on (this is what proves the alert path) |
+| `FAIL_ON_QUALITY_GATE` | on | on |
 
 A full run with the incident simulation takes roughly 8 to 12 minutes; without it,
 about 4.

@@ -167,7 +167,7 @@ describe('PATCH /api/findings/:id', () => {
     expect(response.body.riskScore).toBeLessThan(created.riskScore);
   });
 
-  it('lets an admin update anyone\u2019s finding', async () => {
+  it('lets an admin update any finding', async () => {
     const created = await createFinding(analyst.token);
 
     const response = await request(app)

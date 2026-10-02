@@ -41,7 +41,7 @@ module.exports = {
       outputName: 'junit.xml',
       classNameTemplate: '{classname}',
       titleTemplate: '{title}',
-      ancestorSeparator: ' â€º ',
+      ancestorSeparator: ' > ',
     }],
   ],
 };

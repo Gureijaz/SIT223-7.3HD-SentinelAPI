@@ -29,7 +29,7 @@ describe('findings service', () => {
     expect(() => findingsService.update('nope', { status: 'resolved' }, ADMIN)).toThrow(NotFoundError);
   });
 
-  it('stops an analyst editing someone else’s finding', () => {
+  it('stops an analyst editing a finding that belongs to someone else', () => {
     const created = findingsService.create(PAYLOAD, OWNER);
 
     expect(() => findingsService.update(created.id, { status: 'resolved' }, OTHER)).toThrow(ForbiddenError);
